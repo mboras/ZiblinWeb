@@ -1,0 +1,178 @@
+﻿@page "/dodajHodogramStari"
+
+@using ZiblinWebb.Models
+@using ZiblinWebb.Data
+@using Blazored.Typeahead
+@using Microsoft.AspNetCore.Identity;
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<IdentityUser> UserManager;
+@inject NavigationManager NavigationManager
+
+
+<h3>NOVI HODOGRAM </h3>
+<p> Unesite podatke o hodogramu </p>
+<hr />
+
+<input type="hidden" @bind-value="hodogram.UserId = userId" />
+
+
+@*<BlazoredTypeahead SearchMethod="AutoSearch" @bind-Value="SelectedKlijent">
+
+        <SelectedTemplate>
+            @context.NazivSalona
+        </SelectedTemplate>
+        <ResultTemplate>
+            <b>@context.NazivSalona</b>
+        </ResultTemplate>
+        <NotFoundTemplate>
+            Nema klijenata sa tim nazivom !!!
+        </NotFoundTemplate>
+
+    </BlazoredTypeahead>*@
+
+
+<select class="form-group row" @bind="@SelectedKlijentt">
+
+    <option value=""></option>
+    @foreach (var k in klijenti)
+    {
+<option value="@k.Id"> @k.NazivSalona </option>}
+    }
+
+</select>
+
+<br />
+
+<div>
+    <label>Datum:</label>
+    <div>
+        <InputDate @bind-Value="@hodogram.Datum" class="form-control col-sm-3" />
+    </div>
+</div>
+
+@*<div class="form-group row">
+    <label for="date" class="col-sm-2 col-form-label">Datum:</label>
+    <input type="date" @bind-value="@hodogram.Datum" />
+</div>*@
+
+<div class="form-group row">
+    <label for="txtOstaliBrendovi" class="col-sm-2 col-form-label">Ostali brendovi:</label>
+    <input type="text" @bind-value="hodogram.OstaliBrendovi" />
+</div>
+
+<div class="form-group row">
+    <label for="txtZainteresirani" class="col-sm-2 col-form-label">Zainteresirani za proizvode:</label>
+    <input type="text" @bind-value="@hodogram.ZainteresiraniZaProizvode" />
+</div>
+
+<div class="checkbox checkbox-primary" id="@OstavljeneBrosure">
+    <label><input type="checkbox" @bind-value="hodogram.OstavljeneBrosure" /><b> Ostavljene brošure</b></label>
+</div>
+<div class="form-group row">
+    <label for="txtBrosureNijanseri" class="col-sm-2 col-form-label">Brošure nijanseri:</label>
+    <input type="text" @bind-value="@hodogram.BrosureNijanseri" />
+</div>
+
+<div class="checkbox checkbox-primary" id="@Prezentacija">
+    <label><input type="checkbox" @bind-value="hodogram.KratkaPrezentacija" /><b> Prezentacija</b></label>
+</div>
+<div class="form-group row">
+    <label for="txtOpisPrezentacije" class="col-sm-2 col-form-label">Kratki opis prezetacije:</label>
+    <textarea rows="5" cols="40" @bind="hodogram.OpisPrezentacije"></textarea>
+</div>
+
+<div class="form-group row">
+    <label for="txtNapomene" class="col-sm-2 col-form-label">Napomene:</label>
+    <textarea rows="5" cols="40" @bind="hodogram.Napomene"></textarea>
+</div>
+
+<div class="form-group row">
+    <label for="txtZakljucak" class="col-sm-2 col-form-label">Zaključak:</label>
+    <textarea rows="5" cols="40" @bind="hodogram.Zakljucak"></textarea>
+</div>
+
+
+<div class="form-group">
+    <button type="submit" class="btn btn-primary" @onclick="Spremi">Spremi</button>
+</div>
+
+
+@code { 
+    
+    private string Trazilica { get; set; } = "";
+    private string userId = null;
+    private string date = DateTime.Now.ToString("dd-MM-yyyy");
+
+    private Hodogrami hodogram;
+    private HodogramiService hodogramiService = new HodogramiService();
+
+    private List<Klijenti> klijenti = new List<Klijenti>();
+    private Klijenti SelectedKlijent;
+    private KlijentiService klijentiService = new KlijentiService();
+
+    protected override void OnInitialized()
+    {
+        hodogram = new Hodogrami();
+        klijenti = klijentiService.DohvatiSveKlijente();
+        date = DateTime.Now.ToString("dd-MM-yyyy");
+        LogUsername();
+    }
+
+    private async Task<IEnumerable<Klijenti>> AutoSearch(string searchKlijent)
+    {
+        return await Task.FromResult(klijenti.Where(x => x.NazivSalona.ToLower().Contains(searchKlijent.ToLower())).ToList());
+    }
+
+    protected async Task Spremi()
+    {
+        hodogramiService.KreirajHodogram(hodogram);
+        NavigationManager.NavigateTo("/sviHodogrami");
+    }
+
+    public bool Prezentacija
+    {
+        get => hodogram.KratkaPrezentacija;
+        set
+        {
+            hodogram.KratkaPrezentacija = Prezentacija;
+        }
+    }
+
+    public int SelectedKlijentt
+    {
+        get => hodogram.Klijent;
+        set
+        {
+            hodogram.Klijent = value;
+        }
+    }
+
+    public bool OstavljeneBrosure
+    {
+        get => hodogram.OstavljeneBrosure;
+        set
+        {
+            hodogram.OstavljeneBrosure = OstavljeneBrosure;
+        }
+    }
+
+
+    private string Message = "";
+
+    private async Task LogUsername()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var currentUser = await UserManager.GetUserAsync(user);
+            Message = ($"{user.Identity.Name} is authenticated. Email is { currentUser.Id }");
+            userId = currentUser.Id;
+        }
+        else
+        {
+            Message = ("The user is NOT authenticated.");
+        }
+    } }

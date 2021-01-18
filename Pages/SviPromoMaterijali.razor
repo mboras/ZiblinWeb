@@ -1,0 +1,70 @@
+﻿@page "/sviPromoMaterijali"
+
+@using ZiblinWebb.Data
+@using ZiblinWebb.Models
+
+@inject NavigationManager NavigationManager
+
+
+
+<h3>PROMO MATERIJALI </h3>
+<p> Unesite podatke </p>
+<hr />
+
+<div>
+    <a class="btn btn-success"
+       href='/dodajPromoMaterijal'>Dodaj novi promo materijal</a>
+</div>
+
+<br />
+
+<table class="table">
+    <thead class="thead-light">
+        <tr>
+            <th scope="col">Id</th>
+            <th scope="col">Naziv</th>
+            <th scope="col">Akcije</th>
+
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var promo in promoMaterijali)
+        {
+            <tr>
+                <td scope="row">@promo.Id</td>
+                <td scope="row">@promo.Naziv</td>
+
+                <td scope="row">
+                    <a class="btn btn-primary" href='/urediPromoMaterijal/@promo.Id'>Edit</a>
+                    <a class="btn btn-danger" @onclick="() => IzbrisiPromoMaterijal(promo)">Delete</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+
+@code {
+
+    private List<PromoMaterijali> promoMaterijali = new List<PromoMaterijali>();
+    private PromoMaterijaliService promoMaterijaliService = new PromoMaterijaliService();
+
+    //private List<Korisnici> korisnici = new List<Korisnici>();
+    //private KorisniciService korisniciService = new KorisniciService();
+    //private KorisnikVrstaService korisnikVrstaService = new KorisnikVrstaService();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        promoMaterijali = promoMaterijaliService.DohvatiSvePromoMaterijale();
+
+    }
+
+    private async Task IzbrisiPromoMaterijal(PromoMaterijali promo)
+    {
+
+        promoMaterijaliService.DeletePromoMaterijal(promo);
+
+        await OnInitializedAsync();
+    }
+}

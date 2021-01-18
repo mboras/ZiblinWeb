@@ -1,0 +1,192 @@
+﻿@page "/dodajHodogram"
+
+@using ZiblinWebb.Models
+@using ZiblinWebb.Data
+@using Blazored.Typeahead
+@using Microsoft.AspNetCore.Identity;
+
+@inject NavigationManager NavigationManager
+@inject UserManager<IdentityUser> UserManager;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+
+<h3>NOVI HODOGRAM </h3>
+<p> Unesite podatke o hodogramu </p>
+<hr />
+
+<input type="hidden" @bind-value="hodogram.UserId = userId" />
+
+<EditForm Model="@hodogram" OnValidSubmit="@Spremi">
+    <DataAnnotationsValidator> </DataAnnotationsValidator>
+
+    <div class="form-group row">
+        <label for="cmbNazivSalona" class="col-sm-2 col-form-label">Klijent:</label>
+
+        <select class="form-group row" @bind="@SelectedKlijentt">
+
+            <option value=""></option>
+            @foreach (var k in klijenti)
+            {
+<option value="@k.Id"> @k.NazivSalona </option>}
+            }
+        </select>
+
+        <!--<InputSelect @bind-Value="@hodogram.Klijent">-->
+        @*<option value="0">Odaberite klijenta...</option>*@
+        <!--@foreach (var klijent in klijenti)
+            {
+                <option value="@klijent.Id">@klijent.NazivSalona</option>
+            }
+        </InputSelect>-->
+
+    </div>
+
+    <div class="form-group row">
+        <label for="date" class="col-sm-2 col-form-label">Datum:</label>
+        <InputDate @bind-Value="@hodogram.Datum" class="form-control col-sm-3" />
+        <ValidationMessage For="@(() => hodogram.Datum)"></ValidationMessage>
+    </div>
+    <div class="form-group row">
+        <label for="txtOstaliBrendovi" class="col-sm-2 col-form-label">Ostali brendovi:</label>
+        <div class="col-sm-10">
+            <InputText id="txtOstaliBrendovi" class="form-control" @bind-Value="@hodogram.OstaliBrendovi"></InputText>
+            <ValidationMessage For="@(() => hodogram.OstaliBrendovi)"></ValidationMessage>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtZainteresirani" class="col-sm-2 col-form-label">Zainteresirani za proizvode:</label>
+        <div class="col-sm-10">
+            <InputText id="txtZainteresirani" class="form-control" @bind-Value="@hodogram.ZainteresiraniZaProizvode"></InputText>
+            <ValidationMessage For="@(() => hodogram.ZainteresiraniZaProizvode)"></ValidationMessage>
+        </div>
+    </div>
+    <br />
+    <div class="col-md-3 mb-3">
+        <div class="form-check">
+            <label><InputCheckbox class="form-check-input" @bind-Value="@hodogram.OstavljeneBrosure" />Ostavljene brošure</label><br />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtBrosureNijanseri" class="col-sm-2 col-form-label">Brošure nijanseri:</label>
+        <div class="col-sm-10">
+            <InputText id="txtBrosureNijanseri" class="form-control" @bind-Value="@hodogram.BrosureNijanseri"></InputText>
+            <ValidationMessage For="@(() => hodogram.BrosureNijanseri)"></ValidationMessage>
+        </div>
+    </div>
+    <br />
+    <div class="col-md-3 mb-3">
+        <div class="form-check">
+            <label><InputCheckbox class="form-check-input" @bind-Value="@hodogram.KratkaPrezentacija" />Prezentacija</label><br />
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtOpisPrezentacije" class="col-sm-2 col-form-label">Kratki opis prezetacije:</label>
+        <div class="col-sm-10">
+            <InputText id="txtOpisPrezentacije" class="form-control" @bind-Value="@hodogram.OpisPrezentacije"></InputText>
+            <ValidationMessage For="@(() => hodogram.OpisPrezentacije)"></ValidationMessage>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtNapomene" class="col-sm-2 col-form-label">Napomene:</label>
+        <div class="col-sm-10">
+            <InputTextArea @bind-Value="@hodogram.Napomene" rows="4" cols="50"></InputTextArea>
+            <ValidationMessage For="@(() => hodogram.Napomene)"></ValidationMessage>
+        </div>
+    </div>
+    <div class="form-group row">
+        <label for="txtZakljucak" class="col-sm-2 col-form-label">Zaključak:</label>
+        <div class="col-sm-10">
+            <InputTextArea @bind-Value="@hodogram.Zakljucak" rows="4" cols="50"></InputTextArea>
+            <ValidationMessage For="@(() => hodogram.Zakljucak)"></ValidationMessage>
+        </div>
+    </div>
+
+    <br />
+    <div class="form-group row">
+        <div class="form-group">
+            <button type="submit" class="btn btn-primary">Spremi</button>
+            <a class="btn btn-danger" href='/sviHodogrami'>Odustani</a>
+        </div>
+    </div>
+
+</EditForm>
+
+
+
+
+@code { private string Trazilica { get; set; } = "";
+    private string userId = null;
+    private string date = DateTime.Now.ToString("dd-MM-yyyy");
+
+    private Hodogrami hodogram;
+    private HodogramiService hodogramiService = new HodogramiService();
+
+    private List<Klijenti> klijenti = new List<Klijenti>();
+    private Klijenti SelectedKlijent;
+    private KlijentiService klijentiService = new KlijentiService();
+
+    protected override void OnInitialized()
+    {
+        hodogram = new Hodogrami();
+        klijenti = klijentiService.DohvatiSveKlijente();
+        date = DateTime.Now.ToString("dd-MM-yyyy");
+        LogUsername();
+    }
+
+    private async Task<IEnumerable<Klijenti>> AutoSearch(string searchKlijent)
+    {
+        return await Task.FromResult(klijenti.Where(x => x.NazivSalona.ToLower().Contains(searchKlijent.ToLower())).ToList());
+    }
+
+    protected async Task Spremi()
+    {
+        hodogramiService.KreirajHodogram(hodogram);
+        NavigationManager.NavigateTo("/sviHodogrami");
+    }
+
+    public bool Prezentacija
+    {
+        get => hodogram.KratkaPrezentacija;
+        set
+        {
+            hodogram.KratkaPrezentacija = Prezentacija;
+        }
+    }
+
+    public int SelectedKlijentt
+    {
+        get => hodogram.Klijent;
+        set
+        {
+            hodogram.Klijent = value;
+        }
+    }
+
+    public bool OstavljeneBrosure
+    {
+        get => hodogram.OstavljeneBrosure;
+        set
+        {
+            hodogram.OstavljeneBrosure = OstavljeneBrosure;
+        }
+    }
+
+
+    private string Message = "";
+
+    private async Task LogUsername()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var currentUser = await UserManager.GetUserAsync(user);
+            Message = ($"{user.Identity.Name} is authenticated. Email is { currentUser.Id }");
+            userId = currentUser.Id;
+        }
+        else
+        {
+            Message = ("The user is NOT authenticated.");
+        }
+    } }

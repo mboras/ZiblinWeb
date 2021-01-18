@@ -1,0 +1,56 @@
+﻿@page "/"
+
+@using ZiblinWebb.Models
+@using ZiblinWebb.Data
+@using Blazored.Typeahead
+@using Microsoft.AspNetCore.Identity;
+
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject UserManager<IdentityUser> UserManager;
+@inject NavigationManager NavigationManager
+
+
+<h1>Hello, world!</h1>
+
+Welcome to your new app.
+
+<SurveyPrompt Title="How is Blazor working for you?" />
+
+
+@code{
+
+    public string userId = null;
+    private string Message = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        LogUsername();
+    }
+
+
+    private async Task LogUsername()
+    {
+        var authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        var user = authState.User;
+
+        if (user.Identity.IsAuthenticated)
+        {
+            var currentUser = await UserManager.GetUserAsync(user);
+            Message = ($"{user.Identity.Name} is authenticated. Email is { currentUser.Id }");
+            userId = currentUser.Id;
+            StaticValues.UserId = userId;
+        }
+        else
+        {
+            Message = ("The user is NOT authenticated.");
+        }
+    }
+}
+
+
+
+
+
+
+
+

@@ -1,0 +1,130 @@
+﻿@page "/urediKorisnika/{id:int}"
+
+@using ZiblinWebb.Models
+@using ZiblinWebb.Data
+
+@inject NavigationManager NavigationManager
+
+<h1>UREDI KLIJENTA </h1>
+
+<h3> Uredite podatke o klijentu </h3>
+<br />
+
+<EditForm Model="@klijent" OnValidSubmit="@Izmjeni">
+    <DataAnnotationsValidator> </DataAnnotationsValidator>
+
+    <div class="form-group row">
+        <label for="txtNazivSalona" class="col-sm-2 col-form-label">Naziv salona:</label>
+        <div class="col-sm-10">
+            <InputText id="txtNazivSalona" class="form-control" @bind-Value="@klijent.NazivSalona"></InputText>
+            <ValidationMessage For="@(() => klijent.NazivSalona)"></ValidationMessage>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="txtAdresa" class="col-sm-2 col-form-label">Adresa:</label>
+        <div class="col-sm-10">
+            <InputText id="txtAdresa" class="form-control" @bind-Value="@klijent.Adresa"></InputText>
+            <ValidationMessage For="@(() => klijent.Adresa)"></ValidationMessage>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="txtMjesto" class="col-sm-2 col-form-label">Mjesto:</label>
+        <div class="col-sm-10">
+            <InputText id="txtMjesto" class="form-control" @bind-Value="@klijent.Mjesto"></InputText>
+            <ValidationMessage For="@(() => klijent.Mjesto)"></ValidationMessage>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="txtEmail" class="col-sm-2 col-form-label">Email:</label>
+        <div class="col-sm-10">
+            <InputText id="txtEmail" class="form-control" @bind-Value="@klijent.Email"></InputText>
+            <ValidationMessage For="@(() => klijent.Email)"></ValidationMessage>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="txtTelefon" class="col-sm-2 col-form-label">Telefon:</label>
+        <div class="col-sm-10">
+            <InputText id="txtTelefon" class="form-control" @bind-Value="@klijent.Telefon"></InputText>
+            <ValidationMessage For="@(() => klijent.Telefon)"></ValidationMessage>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="txtMobitel" class="col-sm-2 col-form-label">Mobitel:</label>
+        <div class="col-sm-10">
+            <InputText id="txtMobitel" class="form-control" @bind-Value="@klijent.Mobitel"></InputText>
+            <ValidationMessage For="@(() => klijent.Mobitel)"></ValidationMessage>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label for="txtVlasnik" class="col-sm-2 col-form-label">Vlasnik:</label>
+        <div class="col-sm-10">
+            <InputText id="txtVlasnik" class="form-control" @bind-Value="@klijent.Vlasnik"></InputText>
+            <ValidationMessage For="@(() => klijent.Vlasnik)"></ValidationMessage>
+        </div>
+    </div>
+
+    @*<div class="form-group row">
+            <label for="vrstaKorisnika" class="col-sm-2 col-form-label">Vrsta korisnika:</label>
+            <div class="col-sm-10">
+                <InputSelect id="vrstaKorisnika" class="form-control" @bind-Value="Vrste">
+                    <option value="">Odaberi</option>
+                    @foreach (var vrsta in vrstaKorisnikaa)
+                    {
+                        <option value="@vrsta.Id">
+                            @vrsta.Naziv
+                        </option>
+                    }
+                </InputSelect>
+
+                <ValidationMessage For="@(() => korisnik.VrstaKorisnika)"></ValidationMessage>
+            </div>
+        </div>*@
+
+    <div class="form-group">
+        <button type="submit" class="btn btn-primary">Spremi</button>
+        <a class="btn btn-danger" href='/sviKlijenti'>Odustani</a>
+    </div>
+
+</EditForm>
+
+@code {
+
+    [Parameter]
+    public int id { get; set; }
+
+    private Klijenti klijent;
+    //List<KorisnikVrsta> vrstaKorisnikaa = new List<KorisnikVrsta>();
+    //private KorisnikVrstaService korisnikVrstaService = new KorisnikVrstaService();
+    private KlijentiService klijentiService = new KlijentiService();
+
+    protected override void OnInitialized()
+    {
+        klijent = klijentiService.DohvatiKlijentaPoId(id);
+    }
+
+    //public string Vrste
+    //{
+    //    get => korisnik.VrstaKorisnika.ToString();
+    //    set
+    //    {
+    //        korisnik.VrstaKorisnika = int.Parse(value);
+
+    //    }
+    //}
+
+    protected async Task Izmjeni()
+    {
+        klijentiService.UpdateKlijenta(klijent);
+        NavigationManager.NavigateTo("/sviKlijenti");
+    }
+
+
+
+
+}

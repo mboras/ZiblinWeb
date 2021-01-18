@@ -1,0 +1,114 @@
+﻿@page "/sviHodogrami"
+
+@using ZiblinWebb.Data
+@using ZiblinWebb.Pages
+@using ZiblinWebb.Models
+
+@inject NavigationManager NavigationManager
+
+
+
+<h2>HODOGRAMI</h2>
+
+<p>Prikaz svih hodograma</p>
+<hr />
+
+<div>
+    @if (StaticValues.UserId != null)
+    {
+        <a class="btn btn-success"
+           href='/dodajHodogram'>Dodaj novi hodogram</a>
+    }
+</div>
+
+<br />
+
+@if (hodogrami == null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead class="thead-light">
+            <tr>
+                @*<th scope="col">Korisnik</th>
+                    <th scope="col">Klijent</th>*@
+                <th scope="col">Datum</th>
+                <th scope="col">Ostali brendovi</th>
+                <th scope="col">Prez?</th>
+                <th scope="col">Opis prez</th>
+                <th scope="col">Zain?</th>
+                <th scope="col">Brošure?</th>
+                <th scope="col">Broš/Nijan</th>
+                <th scope="col">Napomene</th>
+                <th scope="col">Zaključak</th>
+                <th scope="col">Akcije</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var hodogram in hodogrami)
+            {
+                <tr>
+                    @*<td scope="row">@korisniciService.DohvatiImeKorisnikaById(hodogram.Korisnik)</td>*@
+                    @*<td scope="row">@klijentiService.DohvatiNazivKlijentaPoId(hodogram.Klijent)</td>*@
+                    <td scope="row">@hodogram.Datum.ToShortTimeString()</td>
+                    <td scope="row">@hodogram.OstaliBrendovi</td>
+                    <td scope="row">@hodogram.KratkaPrezentacija</td>
+                    <td scope="row">@hodogram.OpisPrezentacije</td>
+                    <td scope="row">@hodogram.ZainteresiraniZaProizvode</td>
+                    <td scope="row">@hodogram.OstavljeneBrosure</td>
+                    <td scope="row">@hodogram.BrosureNijanseri</td>
+                    <td scope="row">@hodogram.Napomene</td>
+                    <td scope="row">@hodogram.Zakljucak</td>
+
+                    <td scope="row">
+                        <a class="btn btn-primary" href='/urediHodogram/@hodogram.Id'>Edit</a>
+                        <a class="btn btn-danger" @onclick="() => IzbrisiKorisnika(hodogram)">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+    private List<Hodogrami> hodogrami = new List<Hodogrami>();
+    private HodogramiService hodogramiService = new HodogramiService();
+    //private KorisniciService korisniciService = new KorisniciService();
+    private KlijentiService klijentiService = new KlijentiService();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        hodogrami = hodogramiService.DohvatiHodogrameKorisnika(StaticValues.UserId);
+    }
+
+    private async Task IzbrisiKorisnika(Hodogrami hodogram)
+    {
+        hodogramiService.DeleteHodogram(hodogram);
+        await OnInitializedAsync();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+}

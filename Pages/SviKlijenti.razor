@@ -1,0 +1,108 @@
+﻿@page "/sviKlijenti"
+@using ZiblinWebb.Data
+@using ZiblinWebb.Models
+
+
+@inject NavigationManager NavigationManager
+
+
+
+<h1>KLIJENTI</h1>
+
+<p>Prikaz svih klijenata</p>
+<hr />
+
+<div>
+    <a class="btn btn-success"
+       href='/dodajKlijenta'> Dodaj novog klijenta</a>
+</div>
+
+<br />
+
+@if (klijenti == null)
+{
+    <p><em>Loading...Pokušajte ponovo...</em></p>
+}
+else
+{
+    <table class="table">
+        <thead class="thead-light">
+            <tr>
+                <th scope="col">Id</th>
+                <th scope="col">Šifra salona</th>
+                <th scope="col">Naziv salona</th>
+                <th scope="col">Vlasnik</th>
+                <th scope="col">Adresa</th>
+                <th scope="col">Mjesto</th>
+                <th scope="col">Email</th>
+                <th scope="col">Telefon</th>
+                <th scope="col">Mobitel</th>
+                <th scope="col">Facebook</th>
+                <th scope="col">Instagran</th>
+                <th scope="col">Datum dodavanja</th>
+                <th scope="col">Lokacija</th>
+                <th scope="col">Klijenta dodao</th>
+                <th scope="col">Akcije</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var klijent in klijenti)
+            {
+                <tr>
+                    <td scope="row">@klijent.Id</td>
+                    <td scope="row">@klijent.SifraSalona</td>
+                    <td scope="row">@klijent.NazivSalona</td>
+                    <td scope="row">@klijent.Vlasnik</td>
+                    <td scope="row">@klijent.Adresa</td>
+                    <td scope="row">@klijent.Mjesto</td>
+                    <td scope="row">@klijent.Email</td>
+                    <td scope="row">@klijent.Telefon</td>
+                    <td scope="row">@klijent.Mobitel</td>
+                    <td scope="row">@klijent.Facebook</td>
+                    <td scope="row">@klijent.Instagram</td>
+                    <td scope="row">@klijent.DatumDodavanja.ToShortDateString()</td>
+                    <td scope="row">
+                        <a href="@UriLokacije(klijent.Latitude,klijent.Longitude)" target="_blank"> Upute</a>
+                    </td>
+                    @*<td scope="row">@korisniciService.DohvatiImeKorisnikaById((int)klijent.KlijentaDodao)</td>*@
+                    <td scope="row">
+                        <a class="btn btn-primary" href='/urediKorisnika/@klijent.Id'>Edit</a>
+                        <a class="btn btn-danger" @onclick="() => IzbrisiKlijenta(klijent)">Delete</a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    private List<Klijenti> klijenti = new List<Klijenti>();
+    private KlijentiService klijentiService = new KlijentiService();
+
+    //private KorisniciService korisniciService = new KorisniciService();
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        klijenti = klijentiService.DohvatiSveKlijente();
+    }
+
+    private async Task IzbrisiKlijenta(Klijenti klijent)
+    {
+        klijentiService.DeleteKlijenta(klijent);
+        await OnInitializedAsync();
+    }
+
+    private string UriLokacije(double lat, double lon)
+    {
+        string latt = lat.ToString();
+        string lonn = lon.ToString();
+
+        string tempLat = latt.Replace(",", ".");
+        string tempLon = lonn.Replace(",", ".");
+
+        string url = "https://maps.google.com/maps?q=" + tempLat + "," + tempLon + "&ll=" + tempLat + "," + tempLon + "&z=18";
+
+        return url;
+    }
+}
